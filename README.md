@@ -54,3 +54,7 @@ npm run dev
 - 学習目的のローカルサンプルです。実在の個人情報や秘密情報は入れないでください。
 - 危険な外部副作用は持たせていません。
 - 脆弱版は教材用の再現であり、公開運用を想定した実装ではありません。
+
+## ドキュメント
+
+- 練習ガイド: [docs/practice-guide.md](/Users/niheikeita/develop/security-practice/docs/practice-guide.md)
