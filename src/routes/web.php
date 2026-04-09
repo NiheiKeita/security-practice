@@ -6,8 +6,12 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\ImageController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\PasswordController;
+use App\Http\Controllers\Web\SecurityLabActionController;
+use App\Http\Controllers\Web\SecurityLabPageController;
+use App\Http\Controllers\Web\TopController;
 use App\Http\Middleware\VerifyCsrfToken;
 
 /*
@@ -22,16 +26,33 @@ use App\Http\Middleware\VerifyCsrfToken;
 */
 
 Route::group(['middleware' => 'basicauth'], function () {
+    Route::get('/', [SecurityLabPageController::class, 'top'])->name('lab.top');
     Route::fallback(function () {
-        return redirect(route('web.top'));
+        return redirect(route('lab.top'));
     });
 
     Route::middleware('guest.web')->group(function () {
         Route::get('password/edit/{token}', [PasswordController::class, 'edit'])->name('web.password.edit');
         Route::post('password/edit/{token}', [PasswordController::class, 'update'])->name('web.password.update');
     });
+    Route::get('top', [TopController::class, 'index'])->name('web.top');
     Route::get('login', [LoginController::class, 'create'])->name('user.login');
     Route::post('login', [LoginController::class, 'store']);
+    Route::post('logout', [LoginController::class, 'destroy'])->name('user.logout');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::middleware('guest.web')->group(function () {
+        Route::get('lab/stages', [SecurityLabPageController::class, 'stages'])->name('lab.stages.index');
+        Route::get('lab/stages/{stageCode}', [SecurityLabPageController::class, 'stage'])->name('lab.stages.show');
+        Route::get('lab/rankings', [SecurityLabPageController::class, 'rankings'])->name('lab.rankings.index');
+        Route::get('lab/admin', [SecurityLabPageController::class, 'admin'])->name('lab.admin.index');
+
+        Route::post('lab/api/stages/{stageCode}/view', [SecurityLabActionController::class, 'markView'])->name('lab.api.view');
+        Route::post('lab/api/stages/{stageCode}/{variant}', [SecurityLabActionController::class, 'run'])->name('lab.api.run');
+    });
+    Route::post('lab/api/stage-5/cross-site/{variant}', [SecurityLabActionController::class, 'crossSiteDemo'])
+        ->withoutMiddleware(VerifyCsrfToken::class)
+        ->name('lab.api.cross-site');
 
 
     //管理画面側

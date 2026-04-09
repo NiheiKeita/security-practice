@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --lab-base: #f6f9fc;
+    }
+
+    body {
+        @apply bg-[var(--lab-base)] text-slate-900;
+    }
+}

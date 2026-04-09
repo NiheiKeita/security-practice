@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Providers\RouteServiceProvider;
+use App\Services\SecurityLab\SecurityLabService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,10 @@ use Inertia\Response;
 
 class LoginController extends Controller
 {
+    public function __construct(private readonly SecurityLabService $labService)
+    {
+    }
+
     /**
      * Display the login view.
      */
@@ -22,6 +27,7 @@ class LoginController extends Controller
         return Inertia::render('Web/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
+            'demoAccounts' => $this->labService->topPageData(request()->user())['demoAccounts'],
         ]);
     }
 
@@ -52,6 +58,6 @@ class LoginController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('lab.top');
     }
 }
