@@ -1,0 +1,46 @@
+:root {
+  --mdoc-accent: #0f766e;
+  --mdoc-accent-strong: #115e59;
+  --mdoc-bg: #f7fafc;
+  --mdoc-surface: #ffffff;
+  --mdoc-text: #0f172a;
+  --mdoc-muted: #475569;
+  --mdoc-border: #dbe4ee;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.12), transparent 24%),
+    var(--mdoc-bg);
+  color: var(--mdoc-text);
+}
+
+.app-shell,
+.content-card,
+.sidebar,
+.topbar,
+.search-panel,
+.doc-card {
+  border-radius: 20px;
+}
+
+a {
+  color: var(--mdoc-accent-strong);
+}
+
+a:hover {
+  color: var(--mdoc-accent);
+}
+
+.sidebar,
+.content-card,
+.search-panel,
+.doc-card {
+  border: 1px solid var(--mdoc-border);
+  box-shadow: 0 20px 60px -44px rgba(15, 23, 42, 0.35);
+}
+
+.brand-title {
+  letter-spacing: 0.02em;
+}

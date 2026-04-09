@@ -58,3 +58,5 @@ npm run dev
 ## ドキュメント
 
 - 練習ガイド: [docs/practice-guide.md](/Users/niheikeita/develop/security-practice/docs/practice-guide.md)
+- Docs index: [docs/index.md](/Users/niheikeita/develop/security-practice/docs/index.md)
+- GitHub Pages 想定 URL: `https://niheikeita.github.io/security-practice/`
