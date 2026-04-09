@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "husky": "^9.1.4"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "ci": "npm --prefix ./src ci",
+    "lint": "npm --prefix ./src run lint",
+    "build": "npm --prefix ./src run build",
+    "type-check": "npm --prefix ./src run type-check",
+    "test-storybook": "npm --prefix ./src run test-storybook"
+  }
+}

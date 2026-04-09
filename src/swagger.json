@@ -1,0 +1,90 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/posts": {
+            "get": {
+                "operationId": "5f292ed47bdbfa79356750be0807450c",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Not allowed"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "c2e0b0e26215e6d34ece33ebae25f7df",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Not allowed"
+                    }
+                }
+            }
+        },
+        "/posts/create": {
+            "get": {
+                "operationId": "87880105c55ee709353642ef648ce4ec",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Not allowed"
+                    }
+                }
+            }
+        },
+        "/posts/{id}": {
+            "get": {
+                "operationId": "c8bd68bc05422c879bc2dd429ae5782b",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Not allowed"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "06c81121178208730e11d2f6b655e78d",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Not allowed"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "54788a50da690c5ee1dfdc25425a1f87",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Not allowed"
+                    }
+                }
+            }
+        },
+        "/posts/{id}/edit": {
+            "get": {
+                "operationId": "21af8f810c09713b3cf9987a1624e4fd",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Not allowed"
+                    }
+                }
+            }
+        }
+    }
+}

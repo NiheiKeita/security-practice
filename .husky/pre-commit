@@ -1,0 +1,4 @@
+# docker compose exec -T app vendor/bin/phpstan analyze
+# docker compose exec -T app composer phpcs .
+# npm run lint
+# npm run type-check

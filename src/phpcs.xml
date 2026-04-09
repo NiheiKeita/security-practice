@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<ruleset name="PSR12/Laravel">
+    <description>PSR12 compliant rules and settings for Laravel</description>
+
+    <arg name="extensions" value="php" />
+
+    <!-- コーディング規約指定 -->
+    <rule ref="PSR12">
+      <!--<exclude name="Generic.Files.LineLength"/>-->
+    </rule>
+    <arg name="colors" />
+    <arg value="ps" />
+
+    <!-- 除外ディレクトリ設定 -->
+    <exclude-pattern>/bootstrap/</exclude-pattern>
+    <exclude-pattern>/node_modules/</exclude-pattern>
+    <exclude-pattern>/public/</exclude-pattern>
+    <exclude-pattern>/resources/</exclude-pattern>
+    <exclude-pattern>/storage/</exclude-pattern>
+    <exclude-pattern>/vendor/</exclude-pattern>
+    <exclude-pattern>/server.php</exclude-pattern>
+    <exclude-pattern>/app/Console/Kernel.php</exclude-pattern>
+    <exclude-pattern>/app/Exceptions/</exclude-pattern>
+    <exclude-pattern>/tests/CreatesApplication.php</exclude-pattern>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="140"/>
+            <property name="absoluteLineLimit" value="160"/>
+        </properties>
+    </rule>
+
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+        <exclude-pattern>*/tests/*</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <exclude-pattern>./database/migrations/*</exclude-pattern>
+    </rule>
+
+    <rule ref="Generic.PHP.Syntax" />
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
+    <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement" />
+    <rule ref="Generic.CodeAnalysis.UselessOverridingMethod" />
+    <rule ref="Generic.ControlStructures.DisallowYodaConditions" />
+    <rule ref="Generic.Formatting.SpaceAfterCast" />
+    <rule ref="Generic.PHP.DeprecatedFunctions" />
+    <rule ref="Generic.PHP.ForbiddenFunctions" />
+    <rule ref="Generic.VersionControl.GitMergeConflict" />
+    <rule ref="Generic.WhiteSpace.ArbitraryParenthesesSpacing" />
+    <rule ref="Generic.WhiteSpace.LanguageConstructSpacing" />
+    <rule ref="Generic.WhiteSpace.SpreadOperatorSpacingAfter" />
+    <rule ref="Squiz.WhiteSpace.FunctionSpacing">
+        <properties>
+            <property name="spacing" value="1" />
+            <property name="spacingBeforeFirst" value="0" />
+            <property name="spacingAfterLast" value="0" />
+        </properties>
+    </rule>
+    <rule ref="Squiz.WhiteSpace.SemicolonSpacing" />
+
+    <!-- coding-standard https://github.com/slevomat/coding-standard -->
+    <rule ref="SlevomatCodingStandard.PHP.UselessParentheses" />
+    <rule ref="SlevomatCodingStandard.PHP.UselessSemicolon" />
+    <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses" />
+    <rule ref="SlevomatCodingStandard.Whitespaces.DuplicateSpaces">
+        <properties>
+            <property name="ignoreSpacesBeforeAssignment" value="true"/>
+            <property name="ignoreSpacesInParameters" value="true"/>
+            <property name="ignoreSpacesInAnnotation" value="true"/>
+            <property name="ignoreSpacesInComment" value="true"/>
+        </properties>
+    </rule>
+    <rule ref="SlevomatCodingStandard.Arrays.SingleLineArrayWhitespace" />
+
+    <!-- phpcs-variable-analysis https://github.com/sirbrillig/phpcs-variable-analysis -->
+    <rule ref="VariableAnalysis">
+        <properties>
+            <property name="ignoreUnusedRegexp" value="/^_/"/>
+            <property name="allowUnusedParametersBeforeUsed" value="false"/>
+        </properties>
+    </rule>
+</ruleset>

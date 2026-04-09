@@ -1,0 +1,48 @@
+name: unitTest
+
+on: [pull_request]
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: ./src
+    steps:
+      - uses: actions/checkout@v2
+      - name: dokcer-compose up
+        run: |
+          docker compose up -d
+      - name: composer install
+        run: |
+          docker compose exec app composer install
+      - name: Laravel Settings
+        run: |
+          docker compose exec -T app cp .env.example .env
+          docker compose exec -T app php artisan key:generate
+      - name: Run PHPStan
+        run: docker compose exec app vendor/bin/phpstan analyze
+      - name: composer phpcs .
+        run: |
+          docker compose exec app composer phpcs .
+      - name: phpunit
+        run: |
+          docker compose exec app vendor/bin/phpunit --debug
+          
+      - name: npm
+        run: |
+          npm ci
+      - name: eslint
+        run: npm run lint
+      - name: typeCheck
+        run: npm run type-check
+      - name: Build Storybook 
+        run: npm run build-storybook
+      - name: Serve Storybook
+        run: npx serve storybook-static -l 6006 &
+      - name: Install Playwright with dependencies
+        run: npx playwright install --with-deps
+      - name: storybookTest
+        run: npm run test-storybook
+
