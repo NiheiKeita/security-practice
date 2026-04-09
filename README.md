@@ -60,3 +60,5 @@ npm run dev
 - 練習ガイド: [docs/practice-guide.md](/Users/niheikeita/develop/security-practice/docs/practice-guide.md)
 - Docs index: [docs/index.md](/Users/niheikeita/develop/security-practice/docs/index.md)
 - GitHub Pages 想定 URL: `https://niheikeita.github.io/security-practice/`
+
+PR から GitHub Pages に deploy したい場合は、GitHub 側の `github-pages` environment で `refs/pull/*/merge` を許可する設定が別途必要です。

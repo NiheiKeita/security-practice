@@ -1,11 +1,11 @@
 name: docs-pages
 
-on: [pull_request]
-# on:
-#   push:
-#     branches:
-#       - main
-#   workflow_dispatch:
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -44,6 +44,10 @@ jobs:
           path: ./dist
 
   deploy:
+    # pull_request から deploy する場合は、
+    # repository settings の github-pages environment に
+    # refs/pull/*/merge を deployment branch rule として追加する必要があります。
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
