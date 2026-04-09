@@ -7,7 +7,4 @@ export default {
     repoUrl: "https://github.com/NiheiKeita/security-practice",
     branch: "main",
   },
-  theme: {
-    customCss: "./docs-theme.css",
-  },
 }
