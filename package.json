@@ -1,12 +1,14 @@
 {
   "devDependencies": {
-    "husky": "^9.1.4"
+    "husky": "^9.1.4",
+    "mdocbuilder": "^0.0.1"
   },
   "scripts": {
     "prepare": "husky",
     "ci": "npm --prefix ./src ci",
     "lint": "npm --prefix ./src run lint",
     "build": "npm --prefix ./src run build",
+    "docs:build": "mdocbuilder build",
     "type-check": "npm --prefix ./src run type-check",
     "test-storybook": "npm --prefix ./src run test-storybook"
   }

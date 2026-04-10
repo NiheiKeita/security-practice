@@ -13,9 +13,13 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                display: ['"Avenir Next"', '"Segoe UI"', 'Figtree', ...defaultTheme.fontFamily.sans],
                 yuGothic: ['"Yu Gothic"', 'sans-serif'],
             },
             colors: {
+                lab: {
+                    base: '#f6f9fc',
+                },
                 'theme': {
                     light: '#67e8f9',
                     // DEFAULT: '#292986',
