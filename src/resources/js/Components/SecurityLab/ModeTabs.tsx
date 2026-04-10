@@ -10,12 +10,12 @@ const items: { value: Mode; label: string; description: string }[] = [
     {
         value: 'vuln',
         label: '脆弱版',
-        description: '問題が起きる設計を観察',
+        description: 'まずは問題が起きる方を試す',
     },
     {
         value: 'fixed',
         label: '修正版',
-        description: '安全な実装との差分を確認',
+        description: '次に防がれる方を確認する',
     },
 ]
 

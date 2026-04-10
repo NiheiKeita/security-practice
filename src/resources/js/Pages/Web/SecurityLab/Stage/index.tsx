@@ -48,6 +48,134 @@ type ViewState = {
 
 const statTone = (mode: Mode) => (mode === 'vuln' ? 'warning' : 'safe')
 
+const stageMissionMap: Record<string, Record<Mode, { action: string; learning: string }>> = {
+    'stage-1': {
+        vuln: {
+            action: 'データ送信を調整して、不自然な高得点をそのまま送ってみよう',
+            learning: 'クライアントの値を信用しすぎると、ありえないスコアでも保存されます。',
+        },
+        fixed: {
+            action: '同じような値を送って、サーバー側で拒否される様子を見よう',
+            learning: '修正版ではサーバーがセッション情報と上限を見て判断します。',
+        },
+    },
+    'stage-2': {
+        vuln: {
+            action: '自分以外の user_id を指定して、誰のスコアが更新されるか見てみよう',
+            learning: 'ログインしていても、所有者確認がないと他人のデータを触れてしまいます。',
+        },
+        fixed: {
+            action: '同じ指定をして、更新対象がログイン中ユーザーに固定されることを見よう',
+            learning: '修正版ではリクエスト内の user_id を信用せず、本人のデータだけを更新します。',
+        },
+    },
+    'stage-3': {
+        vuln: {
+            action: '一般ユーザーのまま管理操作を押して、通ってしまうか確認しよう',
+            learning: '画面を隠すだけでは防御にならず、サーバーで拒否しないと危険です。',
+        },
+        fixed: {
+            action: '同じ操作をして、権限エラーになることを確認しよう',
+            learning: '修正版では管理者ロールをサーバー側で必ず確認します。',
+        },
+    },
+    'stage-4': {
+        vuln: {
+            action: 'コメント欄に HTML 風の文字列を入れて、表示がどう変わるか見よう',
+            learning: '保存データが同じでも、表示方法が危険だと問題が起きます。',
+        },
+        fixed: {
+            action: '同じコメントを保存して、文字列として安全に表示されることを見よう',
+            learning: '修正版では入力を HTML として扱わず、安全にテキスト表示します。',
+        },
+    },
+    'stage-5': {
+        vuln: {
+            action: '外部サイト風の送信を試して、勝手に状態変更できるか見よう',
+            learning: 'ログイン済みでも、状態変更には追加の保護が必要です。',
+        },
+        fixed: {
+            action: '正規画面の更新と外部サイト風の送信を比べてみよう',
+            learning: '修正版ではトークン確認が入り、意図しない更新を防ぎます。',
+        },
+    },
+    'stage-6': {
+        vuln: {
+            action: 'API レスポンスを開いて、不要な項目が返っていないか探してみよう',
+            learning: '返しすぎる API は、それだけで情報漏えいの原因になります。',
+        },
+        fixed: {
+            action: '同じ API を見て、必要最小限の項目だけになっているか確認しよう',
+            learning: '修正版では公開用のレスポンスだけを返す設計に分けています。',
+        },
+    },
+}
+
+const stageHintMap: Record<string, Record<Mode, string[]>> = {
+    'stage-1': {
+        vuln: [
+            'ゲームを始めたあと、ブラウザの開発者ツールで通信を観察してみよう。',
+            '特に Network タブで、どの API にどんなデータが送られているかを見ると手がかりになります。',
+            'ランキングが変わるかどうかを見れば、送った値がどう扱われたかを確認できます。',
+        ],
+        fixed: [
+            '脆弱版と同じように通信を観察して、サーバー側の反応の違いを比べてみよう。',
+            '修正版では、同じような値でもサーバー側の判断で結果が変わる場合があります。',
+            '不自然な値がそのまま保存されないことを、ランキングや挙動の差で確認してみよう。',
+        ],
+    },
+    'stage-2': {
+        vuln: [
+            '更新対象のユーザーがどこで決まっているかを見てみよう。',
+            '画面で選んだ対象と、実際に更新された対象が同じとは限りません。',
+        ],
+        fixed: [
+            '修正版では、更新対象をサーバーがどう決めているかに注目してみよう。',
+            '同じ入力でも、誰のデータが変わるかが脆弱版と違うはずです。',
+        ],
+    },
+    'stage-3': {
+        vuln: [
+            '一般ユーザーのまま管理操作を試してみよう。',
+            '画面に管理機能が見えていなくても、本当に使えないとは限りません。',
+        ],
+        fixed: [
+            '同じ操作を修正版でも試してみよう。',
+            'サーバー側で権限を見ているなら、操作結果が変わるはずです。',
+        ],
+    },
+    'stage-4': {
+        vuln: [
+            'コメント欄に、ただの文章以外の文字列を入れて表示の変化を見てみよう。',
+            '保存時ではなく、表示時の扱い方に違いがないかを比べると気づきやすいです。',
+        ],
+        fixed: [
+            '同じコメントを修正版でも表示してみよう。',
+            '同じ保存データでも、見え方が安全寄りになっているかを確認してみてください。',
+        ],
+    },
+    'stage-5': {
+        vuln: [
+            '正規画面の更新と、外部サイト風の送信を比べてみよう。',
+            'ログイン済みというだけで状態変更が通るかどうかを見るのがポイントです。',
+        ],
+        fixed: [
+            '修正版では、追加の確認材料が必要かどうかを見てみよう。',
+            '同じような送信でも、成立する条件が脆弱版と違うはずです。',
+        ],
+    },
+    'stage-6': {
+        vuln: [
+            'レスポンスの中に、画面に出していない情報が含まれていないか探してみよう。',
+            'profile と ranking の両方を見ると違いに気づきやすいです。',
+        ],
+        fixed: [
+            '修正版では、どの項目が消えているかを比べてみよう。',
+            '必要最小限だけ返す設計になっているかを見るのがポイントです。',
+        ],
+    },
+}
+
 export const Stage = React.memo<Props>(function Stage({
     currentUser,
     stage,
@@ -78,8 +206,23 @@ export const Stage = React.memo<Props>(function Stage({
     const [stage5Bio, setStage5Bio] = useState(profilePreview.bio ?? '')
     const [stage6Kind, setStage6Kind] = useState<'profile' | 'ranking'>('profile')
     const [busy, setBusy] = useState(false)
+    const [hintLevel, setHintLevel] = useState<0 | 1 | 2>(0)
 
-    const focusDescription = useMemo(() => mode === 'vuln' ? stage.vulnerable.summary : stage.fixed.summary, [mode, stage.fixed.summary, stage.vulnerable.summary])
+    const mission = useMemo(() => stageMissionMap[stage.code]?.[mode], [mode, stage.code])
+    const hints = useMemo(() => stageHintMap[stage.code]?.[mode] ?? [stage.hint], [mode, stage.code, stage.hint])
+
+    useEffect(() => {
+        setHintLevel(0)
+    }, [mode, stage.code])
+
+    useEffect(() => {
+        setView((prev) => ({
+            ...prev,
+            leaderboard,
+            currentBest,
+            progress,
+        }))
+    }, [leaderboard, currentBest, progress])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -202,25 +345,22 @@ export const Stage = React.memo<Props>(function Stage({
                             onReady={setStage1Score}
                         />
 
-                        <Surface title="Step 3. スコア送信" subtitle="脆弱版では score を送信前に自由に変えられます。">
-                            <div className="grid gap-4 md:grid-cols-[1fr_220px]">
-                                <div>
-                                    <label className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">client_score</label>
-                                    <input
-                                        type="number"
-                                        value={stage1Score}
-                                        onChange={(e) => setStage1Score(Number(e.target.value))}
-                                        className="mt-2 w-full rounded-2xl border-slate-200"
-                                    />
+                        <Surface title="Step 3. どう送るか考えてみよう" subtitle="このステージでは送信フォームをあえて出していません。通信を観察して、どんなリクエストが必要か考える課題です。">
+                            <div className="space-y-4">
+                                <div className="rounded-3xl bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-700">
+                                    local score: <span className="font-semibold text-slate-950">{stage1Score}</span>
+                                    <br />
+                                    session_id: <span className="font-semibold text-slate-950">{stage1SessionId ?? '未発行'}</span>
                                 </div>
-                                <div className="flex items-end">
+
+                                <div className="flex flex-wrap gap-3">
                                     <button
                                         type="button"
                                         onClick={() => submitAction('submit_score', { session_id: stage1SessionId, client_score: stage1Score })}
                                         disabled={busy || stage1SessionId === null}
-                                        className="w-full rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                        スコア送信
+                                        今のスコアを登録
                                     </button>
                                 </div>
                             </div>
@@ -237,7 +377,7 @@ export const Stage = React.memo<Props>(function Stage({
                             onReady={setStage2Score}
                         />
 
-                        <Surface title="更新リクエスト" subtitle="誰のスコアを更新するかで、認可差分を観察します。">
+                        <Surface title="Step 3. どのユーザーが更新されるか確かめよう" subtitle="入力した対象と、実際に更新される対象が同じかを観察する課題です。">
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div>
                                     <label className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">target_user_id</label>
@@ -286,7 +426,7 @@ export const Stage = React.memo<Props>(function Stage({
             case 'stage-3':
                 return (
                     <div className="space-y-5">
-                        <Surface title="管理機能の確認" subtitle="一般ユーザーでも、脆弱版ではサーバー側が通してしまいます。">
+                        <Surface title="Step 1. 管理操作を試してみよう" subtitle="一般ユーザーのまま操作したときの違いを観察する課題です。">
                             <div className="grid gap-4 sm:grid-cols-3">
                                 <div className="rounded-3xl bg-slate-50 p-4">
                                     <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Users</p>
@@ -319,7 +459,7 @@ export const Stage = React.memo<Props>(function Stage({
             case 'stage-4':
                 return (
                     <div className="space-y-5">
-                        <Surface title="コメント保存" subtitle="保存データは同じでも、描画方法の違いで見え方が変わります。">
+                        <Surface title="Step 1. コメントを保存して表示の違いを見よう" subtitle="同じデータでも、見え方がどう変わるかを確認する課題です。">
                             <div className="grid gap-4 md:grid-cols-[220px_1fr]">
                                 <div>
                                     <label className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">score</label>
@@ -340,7 +480,7 @@ export const Stage = React.memo<Props>(function Stage({
             case 'stage-5':
                 return (
                     <div className="space-y-5">
-                        <Surface title="正規画面からのプロフィール更新" subtitle="修正版では追加トークンを付けて送ります。">
+                        <Surface title="Step 1. まず正規画面から更新してみよう" subtitle="あとで外部サイト風の送信と比べるための準備です。">
                             <label className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">bio</label>
                             <textarea value={stage5Bio} onChange={(e) => setStage5Bio(e.target.value)} className="mt-2 min-h-32 w-full rounded-2xl border-slate-200" />
                             <div className="mt-4 flex flex-wrap gap-3">
@@ -357,7 +497,7 @@ export const Stage = React.memo<Props>(function Stage({
                             </div>
                         </Surface>
 
-                        <Surface title="外部サイトを模した送信" subtitle="Cookie だけで状態変更が成立するかを観察します。" tone="warning">
+                        <Surface title="Step 2. 外部サイト風の送信を試してみよう" subtitle="ログイン済みというだけで状態変更できるかを観察する課題です。" tone="warning">
                             <button type="button" onClick={runCrossSiteDemo} className="rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-600" disabled={busy}>
                                 外部サイト風の送信を試す
                             </button>
@@ -368,7 +508,7 @@ export const Stage = React.memo<Props>(function Stage({
             case 'stage-6':
                 return (
                     <div className="space-y-5">
-                        <Surface title="API をのぞく" subtitle="返している JSON 自体が教材です。">
+                        <Surface title="Step 1. API レスポンスを観察しよう" subtitle="返ってくる JSON の中身そのものが課題です。">
                             <div className="grid gap-4 md:grid-cols-[1fr_220px]">
                                 <div>
                                     <label className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">kind</label>
@@ -408,32 +548,29 @@ export const Stage = React.memo<Props>(function Stage({
         <SecurityLabLayout>
             <Head title={stage.title} />
 
-            <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+            <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
                 <Surface>
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-700">Stage {stage.number}</p>
-                    <div className="mt-4 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div>
                             <h2 className="font-display text-4xl font-semibold tracking-tight text-slate-950">{stage.title}</h2>
-                            <p className="mt-4 text-base leading-8 text-slate-600">{stage.overview}</p>
+                            <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600">{stage.overview}</p>
                         </div>
-                        <div className="rounded-[28px] bg-slate-950 px-5 py-4 text-white">
-                            <p className="text-xs uppercase tracking-[0.28em] text-slate-300">Current Best</p>
+                        <div className="rounded-[28px] border border-slate-200 bg-slate-50 px-5 py-4 text-slate-900">
+                            <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Best Score</p>
                             <p className="mt-2 font-display text-4xl font-semibold">{view.currentBest ?? '-'}</p>
                         </div>
                     </div>
                 </Surface>
 
-                <Surface title="学習テーマ" subtitle={stage.objective} tone="safe">
-                    <div className="flex flex-wrap gap-2">
-                        {stage.focus_points.map((point) => (
-                            <span key={point} className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-700">
-                                {point}
-                            </span>
-                        ))}
+                <Surface title="今やること" subtitle={mission?.action ?? stage.objective} tone={statTone(mode)}>
+                    <div className="space-y-4">
+                        <p className="text-base leading-8 text-slate-700">{mission?.learning ?? stage.objective}</p>
+                        <div className="rounded-3xl bg-white px-4 py-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Hint</p>
+                            <p className="mt-2 text-sm leading-7 text-slate-700">{stage.hint}</p>
+                        </div>
                     </div>
-                    <p className="mt-5 rounded-3xl bg-slate-950 p-5 text-sm leading-7 text-slate-200">
-                        注目ポイント: {stage.hint}
-                    </p>
                 </Surface>
             </section>
 
@@ -443,28 +580,49 @@ export const Stage = React.memo<Props>(function Stage({
 
             <section className="mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
                 <div className="space-y-6">
-                    <Surface title={mode === 'vuln' ? stage.vulnerable.label : stage.fixed.label} subtitle={focusDescription} tone={statTone(mode)}>
-                        <div className="grid gap-4 sm:grid-cols-3">
-                            <div className="rounded-3xl bg-white p-4">
-                                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Vuln Viewed</p>
-                                <p className="mt-2 text-sm font-semibold text-slate-900">{view.progress.vulnViewed ? 'Yes' : 'No'}</p>
-                            </div>
-                            <div className="rounded-3xl bg-white p-4">
-                                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Fixed Viewed</p>
-                                <p className="mt-2 text-sm font-semibold text-slate-900">{view.progress.fixedViewed ? 'Yes' : 'No'}</p>
-                            </div>
-                            <div className="rounded-3xl bg-white p-4">
-                                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Completed</p>
-                                <p className="mt-2 text-sm font-semibold text-slate-900">{view.progress.completed ? 'Yes' : 'No'}</p>
-                            </div>
-                        </div>
-                    </Surface>
-
                     {renderStageControls()}
                 </div>
 
                 <div className="space-y-6">
-                    <Surface title="Leaderboard Preview" subtitle="保存結果の変化をここで追えます。">
+                    <Surface title="ヒント" subtitle="必要になったら 1 段階ずつ開いてください。">
+                        <div className="flex flex-wrap gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setHintLevel((prev) => prev >= 1 ? 0 : 1)}
+                                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                            >
+                                {hintLevel >= 1 ? 'ヒント1を閉じる' : 'ヒント1を見る'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setHintLevel((prev) => prev >= 2 ? 1 : 2)}
+                                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                            >
+                                {hintLevel >= 2 ? 'ヒント2を閉じる' : 'ヒント2を見る'}
+                            </button>
+                        </div>
+                        {hintLevel >= 1 && (
+                            <div className="mt-4 rounded-3xl bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-700">
+                                {hints[0]}
+                            </div>
+                        )}
+                        {hintLevel >= 2 && (
+                            <div className="mt-3 rounded-3xl bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-700">
+                                {hints[1] ?? hints[hints.length - 1]}
+                            </div>
+                        )}
+                    </Surface>
+
+                    <Surface title="ランキング" subtitle="必要なら更新して最新状態を見てください。">
+                        <div className="mb-4 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => router.reload()}
+                                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                            >
+                                更新
+                            </button>
+                        </div>
                         <div className="space-y-3">
                             {view.leaderboard.map((entry) => (
                                 <div key={entry.id} className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 md:grid-cols-[60px_1fr_100px] md:items-center">
@@ -483,13 +641,13 @@ export const Stage = React.memo<Props>(function Stage({
                         </div>
                     </Surface>
 
-                    <JsonPanel title="Request Example" value={view.latest?.request ?? { guide: '操作を実行するとここに送信内容が出ます。' }} tone={statTone(mode)} />
-                    <JsonPanel title="Server Decision" value={view.latest?.serverDecision ?? { guide: 'サーバーが何を判断したかをここに表示します。' }} tone={statTone(mode)} />
-                    <JsonPanel title="Stored / Response" value={{
-                        stored: view.latest?.stored ?? null,
-                        response: view.latest?.response ?? (mode === 'vuln' ? apiExamples.vulnerable : apiExamples.fixed),
-                        message: view.latest?.message ?? 'まだ実行結果はありません。',
-                    }} tone={statTone(mode)} />
+                    {view.latest && (
+                        <Surface title="実行メモ" subtitle={view.latest.message} tone={statTone(mode)}>
+                            <p className="text-sm leading-7 text-slate-700">
+                                必要ならブラウザの開発者ツールや画面の変化と合わせて確認してください。
+                            </p>
+                        </Surface>
+                    )}
                 </div>
             </section>
 
